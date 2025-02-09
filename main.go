@@ -111,6 +111,13 @@ func (scene *Scene) updateCamera() {
 	if rl.IsKeyDown(rl.KeyD) {
 		scene.camera.position.x += speed
 	}
+
+	if rl.IsKeyDown(rl.KeyE) {
+		scene.camera.height += speed
+	}
+	if rl.IsKeyDown(rl.KeyQ) {
+		scene.camera.height -= speed
+	}
 }
 
 func (scene *Scene) LoadSetup() {
