@@ -85,9 +85,65 @@ func (scene *Scene) loadColorMap() {
 	scene.colorMap = img
 }
 
+func (scene *Scene) initCamera() {
+	scene.camera = &Camera{
+		position:     [2]int{scene.widht / 2, scene.height / 2},
+		horizon_pos:  120,
+		height:       100,
+		scale_height: 200,
+		max_dist:     700,
+	}
+}
+
+func (scene *Scene) updateCamera() {
+	speed := 2
+	if rl.IsKeyDown(rl.KeyW) {
+		scene.camera.position[1] -= speed
+	}
+	if rl.IsKeyDown(rl.KeyS) {
+		scene.camera.position[1] += speed
+	}
+	if rl.IsKeyDown(rl.KeyA) {
+		scene.camera.position[0] -= speed
+	}
+	if rl.IsKeyDown(rl.KeyD) {
+		scene.camera.position[0] += speed
+	}
+}
+
 func (scene *Scene) LoadSetup() {
 	scene.loadHeightMap()
 	scene.loadColorMap()
+	scene.initCamera()
+}
+
+func (scene *Scene) render() {
+	for z := scene.camera.max_dist; z > 1; z-- {
+		pleftX := -z + scene.camera.position[0]
+		pleftY := -z + scene.camera.position[1]
+		prightX := z + scene.camera.position[0]
+		// prightY := -z + scene.camera.position[1]
+
+		dx := float32(prightX-pleftX) / float32(SCREEN_WIDHT)
+		px := float32(pleftX)
+
+		for i := 0; i < SCREEN_WIDHT; i++ {
+			x := int(px)
+			y := pleftY
+
+			if x >= 0 && x < scene.widht && y >= 0 && y < scene.height {
+				heightOnScreen := float32(scene.camera.height-int(scene.heightMaps[y][x])) / float32(z) * float32(scene.camera.scale_height)
+				heightOnScreen += float32(scene.camera.horizon_pos)
+
+				color := scene.colorMap.At(x, y)
+				r, g, b, _ := color.RGBA()
+				col := rl.NewColor(uint8(r>>8), uint8(g>>8), uint8(b>>8), 255)
+
+				rl.DrawLine(int32(i), int32(heightOnScreen), int32(i), SCREEN_HEIGHT, col)
+			}
+			px += dx
+		}
+	}
 }
 
 func main() {
@@ -100,8 +156,11 @@ func main() {
 	defer rl.UnloadRenderTexture(renderTexture)
 
 	for !rl.WindowShouldClose() {
+		scene.updateCamera()
 		rl.BeginTextureMode(renderTexture)
 		rl.ClearBackground(rl.SkyBlue)
+
+		scene.render()
 
 		rl.EndTextureMode()
 
