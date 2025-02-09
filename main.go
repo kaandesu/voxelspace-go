@@ -20,7 +20,9 @@ type (
 		height        int
 	}
 	Camera struct {
-		position     [2]int
+		position struct {
+			x, y int
+		}
 		height       int
 		horizon_pos  int
 		scale_height int
@@ -87,7 +89,7 @@ func (scene *Scene) loadColorMap() {
 
 func (scene *Scene) initCamera() {
 	scene.camera = &Camera{
-		position:     [2]int{scene.widht / 2, scene.height / 2},
+		position:     struct{ x, y int }{x: scene.widht / 2, y: scene.height / 2},
 		horizon_pos:  120,
 		height:       100,
 		scale_height: 200,
@@ -98,16 +100,16 @@ func (scene *Scene) initCamera() {
 func (scene *Scene) updateCamera() {
 	speed := 2
 	if rl.IsKeyDown(rl.KeyW) {
-		scene.camera.position[1] -= speed
+		scene.camera.position.y -= speed
 	}
 	if rl.IsKeyDown(rl.KeyS) {
-		scene.camera.position[1] += speed
+		scene.camera.position.y += speed
 	}
 	if rl.IsKeyDown(rl.KeyA) {
-		scene.camera.position[0] -= speed
+		scene.camera.position.x -= speed
 	}
 	if rl.IsKeyDown(rl.KeyD) {
-		scene.camera.position[0] += speed
+		scene.camera.position.x += speed
 	}
 }
 
@@ -119,9 +121,9 @@ func (scene *Scene) LoadSetup() {
 
 func (scene *Scene) render() {
 	for z := scene.camera.max_dist; z > 1; z-- {
-		pleftX := -z + scene.camera.position[0]
-		pleftY := -z + scene.camera.position[1]
-		prightX := z + scene.camera.position[0]
+		pleftX := -z + scene.camera.position.x
+		pleftY := -z + scene.camera.position.y
+		prightX := z + scene.camera.position.x
 		// prightY := -z + scene.camera.position[1]
 
 		dx := float32(prightX-pleftX) / float32(SCREEN_WIDHT)
@@ -137,7 +139,7 @@ func (scene *Scene) render() {
 
 				color := scene.colorMap.At(x, y)
 				r, g, b, _ := color.RGBA()
-				col := rl.NewColor(uint8(r>>8), uint8(g>>8), uint8(b>>8), 255)
+				col := rl.NewColor(uint8(r), uint8(g), uint8(b), 255)
 
 				rl.DrawLine(int32(i), int32(heightOnScreen), int32(i), SCREEN_HEIGHT, col)
 			}
