@@ -118,6 +118,13 @@ func (scene *Scene) updateCamera() {
 	if rl.IsKeyDown(rl.KeyQ) {
 		scene.camera.height -= speed
 	}
+
+	if rl.IsKeyDown(rl.KeyUp) {
+		scene.camera.horizon_pos += speed * 2
+	}
+	if rl.IsKeyDown(rl.KeyDown) {
+		scene.camera.horizon_pos -= speed * 2
+	}
 }
 
 func (scene *Scene) LoadSetup() {
