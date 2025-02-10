@@ -4,6 +4,7 @@ import (
 	"image"
 	"image/png"
 	"log/slog"
+	"math"
 	"os"
 
 	rl "github.com/gen2brain/raylib-go/raylib"
@@ -23,6 +24,7 @@ type (
 		position struct {
 			x, y int
 		}
+		speed        int
 		height       int
 		horizon_pos  int
 		scale_height int
@@ -90,6 +92,7 @@ func (scene *Scene) loadColorMap() {
 func (scene *Scene) initCamera() {
 	scene.camera = &Camera{
 		position:     struct{ x, y int }{x: scene.widht / 2, y: scene.height / 2},
+		speed:        3,
 		horizon_pos:  120,
 		height:       100,
 		scale_height: 200,
@@ -98,32 +101,32 @@ func (scene *Scene) initCamera() {
 }
 
 func (scene *Scene) updateCamera() {
-	speed := 2
+	camSpeed := scene.camera.speed
 	if rl.IsKeyDown(rl.KeyW) {
-		scene.camera.position.y -= speed
+		scene.camera.position.y -= camSpeed
 	}
 	if rl.IsKeyDown(rl.KeyS) {
-		scene.camera.position.y += speed
+		scene.camera.position.y += camSpeed
 	}
 	if rl.IsKeyDown(rl.KeyA) {
-		scene.camera.position.x -= speed
+		scene.camera.position.x -= camSpeed
 	}
 	if rl.IsKeyDown(rl.KeyD) {
-		scene.camera.position.x += speed
+		scene.camera.position.x += camSpeed
 	}
 
 	if rl.IsKeyDown(rl.KeyE) {
-		scene.camera.height += speed
+		scene.camera.height += camSpeed
 	}
 	if rl.IsKeyDown(rl.KeyQ) {
-		scene.camera.height -= speed
+		scene.camera.height -= camSpeed
 	}
 
 	if rl.IsKeyDown(rl.KeyUp) {
-		scene.camera.horizon_pos += speed * 2
+		scene.camera.horizon_pos += camSpeed * 2
 	}
 	if rl.IsKeyDown(rl.KeyDown) {
-		scene.camera.horizon_pos -= speed * 2
+		scene.camera.horizon_pos -= camSpeed * 2
 	}
 }
 
