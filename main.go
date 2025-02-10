@@ -134,7 +134,7 @@ func (scene *Scene) LoadSetup() {
 }
 
 func (scene *Scene) render() {
-	for z := scene.camera.max_dist; z > 1; z-- {
+	for z := scene.camera.max_dist; z > 0; z-- {
 		pleftX := -z + scene.camera.position.x
 		pleftY := -z + scene.camera.position.y
 		prightX := z + scene.camera.position.x
@@ -150,6 +150,9 @@ func (scene *Scene) render() {
 			if x >= 0 && x < scene.widht && y >= 0 && y < scene.height {
 				heightOnScreen := float32(scene.camera.height-int(scene.heightMaps[y][x])) / float32(z) * float32(scene.camera.scale_height)
 				heightOnScreen += float32(scene.camera.horizon_pos)
+
+				// NOTE: line below makes the height-map convex
+				heightOnScreen = heightOnScreen * float32(math.Abs(float64(scene.camera.max_dist+z/scene.camera.max_dist)))
 
 				color := scene.colorMap.At(x, y)
 				r, g, b, _ := color.RGBA()
