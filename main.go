@@ -10,6 +10,11 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
+const (
+	SCREEN_WIDHT  = 640
+	SCREEN_HEIGHT = 480
+)
+
 type (
 	Scene struct {
 		colorMap      image.Image
@@ -17,6 +22,7 @@ type (
 		heightMapPath string
 		colorMapPath  string
 		heightMaps    [][]uint8
+		yBuffer       []float32
 		widht         int
 		height        int
 	}
@@ -32,15 +38,15 @@ type (
 	}
 )
 
-const (
-	SCREEN_WIDHT  = 640
-	SCREEN_HEIGHT = 480
-)
-
 func NewScene(mapPath, colorPath string) *Scene {
+	buffer := make([]float32, SCREEN_WIDHT)
+	for i := range SCREEN_WIDHT {
+		buffer[i] = SCREEN_HEIGHT
+	}
 	return &Scene{
 		heightMapPath: mapPath,
 		colorMapPath:  colorPath,
+		yBuffer:       buffer,
 	}
 }
 
@@ -140,8 +146,11 @@ func (scene *Scene) LoadSetup() {
 const QoL int = 10
 
 func (scene *Scene) render() {
-	for z := scene.camera.max_dist; z > 0; {
-		z -= ((z + 1) * QoL / scene.camera.max_dist) + 1
+	for i := range scene.yBuffer {
+		scene.yBuffer[i] = SCREEN_HEIGHT
+	}
+	for z := 0; z < scene.camera.max_dist; {
+		z += ((z + 1) * QoL / scene.camera.max_dist) + 1
 		pleftX := -z + scene.camera.position.x
 		pleftY := -z + scene.camera.position.y
 		prightX := z + scene.camera.position.x
@@ -165,7 +174,10 @@ func (scene *Scene) render() {
 				r, g, b, _ := color.RGBA()
 				col := rl.NewColor(uint8(r), uint8(g), uint8(b), 255)
 
-				rl.DrawLine(int32(i), int32(heightOnScreen), int32(i), SCREEN_HEIGHT, col)
+				if heightOnScreen < scene.yBuffer[i] {
+					rl.DrawLine(int32(i), int32(heightOnScreen), int32(i), int32(scene.yBuffer[i]), col)
+					scene.yBuffer[i] = heightOnScreen
+				}
 			}
 			px += dx
 		}
