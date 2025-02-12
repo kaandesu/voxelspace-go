@@ -168,7 +168,8 @@ func (scene *Scene) render() {
 				heightOnScreen += float32(scene.camera.horizon_pos)
 
 				// NOTE: line below makes the height-map convex
-				heightOnScreen = heightOnScreen * float32(math.Abs(float64(scene.camera.max_dist+z))/float64(scene.camera.max_dist))
+				curviture := float32(math.Pow(float64(scene.camera.max_dist+z)/float64(scene.camera.max_dist), 2))
+				heightOnScreen = heightOnScreen * curviture
 
 				color := scene.colorMap.At(x, y)
 				r, g, b, _ := color.RGBA()
