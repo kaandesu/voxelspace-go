@@ -136,8 +136,12 @@ func (scene *Scene) LoadSetup() {
 	scene.initCamera()
 }
 
+// NOTE: lower is more queality less peformance
+const QoL int = 10
+
 func (scene *Scene) render() {
-	for z := scene.camera.max_dist; z > 0; z-- {
+	for z := scene.camera.max_dist; z > 0; {
+		z -= ((z + 1) * QoL / scene.camera.max_dist) + 1
 		pleftX := -z + scene.camera.position.x
 		pleftY := -z + scene.camera.position.y
 		prightX := z + scene.camera.position.x
