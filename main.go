@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	SCREEN_WIDHT  = 640
-	SCREEN_HEIGHT = 480
+	SCREEN_WIDHT  = 500
+	SCREEN_HEIGHT = 500
 )
 
 type (
@@ -143,7 +143,7 @@ func (scene *Scene) LoadSetup() {
 }
 
 // NOTE: lower is more queality less peformance
-const QoL int = 10
+const QoL int = 15
 
 func (scene *Scene) render() {
 	for i := range scene.yBuffer {
@@ -160,25 +160,31 @@ func (scene *Scene) render() {
 		px := float32(pleftX)
 
 		for i := 0; i < SCREEN_WIDHT; i++ {
-			x := int(px)
-			y := pleftY
+			x := int(px) % scene.widht
+			y := pleftY % scene.height
 
-			if x >= 0 && x < scene.widht && y >= 0 && y < scene.height {
-				heightOnScreen := float32(scene.camera.height-int(scene.heightMaps[y][x])) / float32(z) * float32(scene.camera.scale_height)
-				heightOnScreen += float32(scene.camera.horizon_pos)
+			if x < 0 {
+				x = (scene.widht - x) % scene.widht
+			}
 
-				// NOTE: line below makes the height-map convex
-				curviture := float32(math.Pow(float64(scene.camera.max_dist+z)/float64(scene.camera.max_dist), 2))
-				heightOnScreen = heightOnScreen * curviture
+			if y < 0 {
+				y = (scene.height - y) % scene.height
+			}
 
-				color := scene.colorMap.At(x, y)
-				r, g, b, _ := color.RGBA()
-				col := rl.NewColor(uint8(r), uint8(g), uint8(b), 255)
+			heightOnScreen := float32(scene.camera.height-int(scene.heightMaps[y][x])) / float32(z) * float32(scene.camera.scale_height)
+			heightOnScreen += float32(scene.camera.horizon_pos)
 
-				if heightOnScreen < scene.yBuffer[i] {
-					rl.DrawLine(int32(i), int32(heightOnScreen), int32(i), int32(scene.yBuffer[i]), col)
-					scene.yBuffer[i] = heightOnScreen
-				}
+			// NOTE: line below makes the height-map convex
+			curviture := float32(math.Pow(float64(scene.camera.max_dist+z)/float64(scene.camera.max_dist), 2))
+			heightOnScreen = heightOnScreen * curviture
+
+			color := scene.colorMap.At(x, y)
+			r, g, b, _ := color.RGBA()
+			col := rl.NewColor(uint8(r), uint8(g), uint8(b), 255)
+
+			if heightOnScreen < scene.yBuffer[i] {
+				rl.DrawLine(int32(i), int32(heightOnScreen), int32(i), int32(scene.yBuffer[i]), col)
+				scene.yBuffer[i] = heightOnScreen
 			}
 			px += dx
 		}
